@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIB & TOPSIS Scenario Analysis Tool</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <h1>CIB & TOPSIS Scenario Analysis Tool</h1>
+
+  <div id="descriptor-section">
+    <h2>Add Descriptors</h2>
+    <form id="descriptor-form">
+      <label for="descriptor-name">Descriptor Name:</label>
+      <input type="text" id="descriptor-name" required>
+      <button type="button" id="add-descriptor">Add Descriptor</button>
+    </form>
+    <div id="descriptor-list"></div>
+  </div>
+
+  <div id="variant-section" style="display:none;">
+    <h2>Add Variants</h2>
+    <input type="text" id="manual-variants" placeholder="Enter comma-separated variants">
+    <button type="button" id="add-variant">Add Variants</button>
+    <div id="variant-list"></div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
