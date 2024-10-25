@@ -2,6 +2,7 @@ let descriptors = [];
 let matrixData = [];
 let consistencyValue = 0;
 let ahpWeights = {};
+let colorPalette = ['#3498db', '#e74c3c', '#2ecc71', '#9b59b6', '#f1c40f', '#e67e22', '#1abc9c', '#34495e'];
 
 // Add a new descriptor
 document.getElementById('add-descriptor').addEventListener('click', addDescriptor);
@@ -10,72 +11,71 @@ function addDescriptor() {
     const descriptorName = prompt('Enter Descriptor Name');
     if (!descriptorName) return;
 
-    descriptors.push({ name: descriptorName, variants: [], minValue: 0, maxValue: 100 });
+    descriptors.push({ name: descriptorName, variants: [] });
     updateDescriptorTable();
 }
 
 // Update the descriptor table to allow modification
 function updateDescriptorTable() {
-    const tableBody = document.querySelector('#descriptor-table tbody');
-    tableBody.innerHTML = '';
+    const listDiv = document.getElementById('descriptor-list');
+    listDiv.innerHTML = '';
     
     descriptors.forEach((desc, index) => {
-        const row = document.createElement('tr');
-        
-        // Descriptor Name
-        const nameCell = document.createElement('td');
-        const nameInput = document.createElement('input');
-        nameInput.type = 'text';
-        nameInput.value = desc.name;
-        nameInput.addEventListener('change', (e) => desc.name = e.target.value);
-        nameCell.appendChild(nameInput);
-        row.appendChild(nameCell);
-        
-        // Variants
-        const variantCell = document.createElement('td');
-        const variantInput = document.createElement('input');
-        variantInput.type = 'text';
-        variantInput.value = desc.variants.join(', ');
-        variantInput.placeholder = 'Comma-separated';
-        variantInput.addEventListener('change', (e) => desc.variants = e.target.value.split(',').map(v => v.trim()));
-        variantCell.appendChild(variantInput);
-        row.appendChild(variantCell);
+        const descDiv = document.createElement('div');
+        descDiv.classList.add('descriptor-item');
 
-        // Min Value
-        const minCell = document.createElement('td');
-        const minInput = document.createElement('input');
-        minInput.type = 'number';
-        minInput.value = desc.minValue;
-        minInput.addEventListener('change', (e) => desc.minValue = parseFloat(e.target.value));
-        minCell.appendChild(minInput);
-        row.appendChild(minCell);
+        const header = document.createElement('h3');
+        header.innerText = desc.name;
+        descDiv.appendChild(header);
 
-        // Max Value
-        const maxCell = document.createElement('td');
-        const maxInput = document.createElement('input');
-        maxInput.type = 'number';
-        maxInput.value = desc.maxValue;
-        maxInput.addEventListener('change', (e) => desc.maxValue = parseFloat(e.target.value));
-        maxCell.appendChild(maxInput);
-        row.appendChild(maxCell);
-        
-        // Actions
-        const actionCell = document.createElement('td');
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
-        deleteButton.addEventListener('click', () => {
-            descriptors.splice(index, 1);
-            updateDescriptorTable();
-            generateCrossImpactMatrix();
+        const variantList = document.createElement('div');
+        variantList.classList.add('variant-list');
+
+        const addVariantButton = document.createElement('button');
+        addVariantButton.textContent = 'Add Variant';
+        addVariantButton.addEventListener('click', () => addVariant(desc, variantList));
+        descDiv.appendChild(addVariantButton);
+
+        desc.variants.forEach(variant => {
+            addVariantRow(variantList, desc, variant);
         });
-        actionCell.appendChild(deleteButton);
-        row.appendChild(actionCell);
-        
-        tableBody.appendChild(row);
+
+        descDiv.appendChild(variantList);
+        descDiv.style.backgroundColor = colorPalette[index % colorPalette.length]; // Color by descriptor
+        descDiv.classList.add('variant-color');
+        listDiv.appendChild(descDiv);
     });
-    
+
     generateCrossImpactMatrix();
     generateAHPWeights();
+}
+
+// Add a new variant row
+function addVariant(descriptor, variantList) {
+    const variantName = prompt('Enter Variant Name');
+    if (!variantName) return;
+
+    descriptor.variants.push(variantName);
+    addVariantRow(variantList, descriptor, variantName);
+    generateCrossImpactMatrix();
+}
+
+function addVariantRow(variantList, descriptor, variantName) {
+    const row = document.createElement('div');
+    row.classList.add('variant-row');
+    row.innerText = variantName;
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.addEventListener('click', () => {
+        const index = descriptor.variants.indexOf(variantName);
+        if (index > -1) descriptor.variants.splice(index, 1);
+        variantList.removeChild(row);
+        generateCrossImpactMatrix();
+    });
+
+    row.appendChild(deleteButton);
+    variantList.appendChild(row);
 }
 
 // Generate the cross-impact matrix
@@ -123,6 +123,7 @@ function generateCrossImpactMatrix() {
                     input.addEventListener('change', (e) => {
                         const value = e.target.value;
                         updateMatrixData(descRow.name, variantRow, descCol.name, variantCol, value);
+                        colorMatrixCell(cell, value);
                     });
 
                     cell.appendChild(input);
@@ -135,6 +136,18 @@ function generateCrossImpactMatrix() {
     });
 
     matrixDiv.appendChild(table);
+}
+
+// Color the matrix cell based on the value
+function colorMatrixCell(cell, value) {
+    cell.className = ''; // Reset class
+    if (value == 0) {
+        cell.classList.add('cross-impact-value0');
+    } else if (value > 0) {
+        cell.classList.add(`cross-impact-value${Math.min(value, 3)}`);
+    } else {
+        cell.classList.add(`cross-impact-value${Math.max(value, -3)}`);
+    }
 }
 
 // Store matrix data
@@ -184,110 +197,11 @@ function displayScenarioTable(scenarios) {
     const scenarioTable = document.getElementById('scenario-table');
     scenarioTable.innerHTML = '';
 
-    let headerRow = document.createElement('tr');
-    let descHeader = document.createElement('th');
-    descHeader.innerText = 'Descriptor';
-    let variantHeader = document.createElement('th');
-    variantHeader.innerText = 'Variant';
-    let impactHeader = document.createElement('th');
-    impactHeader.innerText = 'Impact Sum';
-
-    headerRow.appendChild(descHeader);
-    headerRow.appendChild(variantHeader);
-    headerRow.appendChild(impactHeader);
-    scenarioTable.appendChild(headerRow);
-
+    // Create scenario cards side-by-side
     scenarios.forEach(scenario => {
-        let row = document.createElement('tr');
-        let descCell = document.createElement('td');
-        descCell.innerText = scenario.descriptor;
-        let variantCell = document.createElement('td');
-        variantCell.innerText = scenario.variant;
-        let impactCell = document.createElement('td');
-        impactCell.innerText = scenario.impactSum;
-
-        row.appendChild(descCell);
-        row.appendChild(variantCell);
-        row.appendChild(impactCell);
-        scenarioTable.appendChild(row);
+        let card = document.createElement('div');
+        card.classList.add('scenario-card');
+        card.innerText = `${scenario.descriptor}: ${scenario.variant}\nImpact Sum: ${scenario.impactSum}`;
+        scenarioTable.appendChild(card);
     });
-}
-
-// Generate sliders for weighting descriptors (AHP Method)
-function generateAHPWeights() {
-    const ahpSlidersDiv = document.getElementById('ahp-sliders');
-    ahpSlidersDiv.innerHTML = '';
-
-    descriptors.forEach((desc, index) => {
-        let label = document.createElement('label');
-        label.innerText = `${desc.name} Weight: `;
-        let slider = document.createElement('input');
-        slider.type = 'range';
-        slider.min = '0';
-        slider.max = '1';
-        slider.step = '0.01';
-        slider.value = '0.5';
-        slider.addEventListener('input', (e) => {
-            ahpWeights[desc.name] = parseFloat(e.target.value);
-        });
-
-        ahpWeights[desc.name] = 0.5; // default weight
-
-        label.appendChild(slider);
-        ahpSlidersDiv.appendChild(label);
-    });
-}
-
-// Rank scenarios based on TOPSIS method and AHP weights
-document.getElementById('rank-scenarios').addEventListener('click', rankScenarios);
-
-function rankScenarios() {
-    // Normalize the data using TOPSIS
-    let normalizedScenarios = normalizeScenarios();
-    let rankedScenarios = normalizedScenarios.sort((a, b) => b.score - a.score);
-
-    // Display the ranked scenarios
-    const rankedScenariosList = document.getElementById('ranked-scenarios');
-    rankedScenariosList.innerHTML = '';
-    rankedScenarios.forEach((scenario, index) => {
-        let li = document.createElement('li');
-        li.textContent = `Rank ${index + 1}: ${scenario.descriptor} - ${scenario.variant} (Score: ${scenario.score.toFixed(2)})`;
-        rankedScenariosList.appendChild(li);
-    });
-}
-
-// Normalize scenarios and apply TOPSIS ranking
-function normalizeScenarios() {
-    let minMaxValues = {};
-
-    // Calculate min and max for each descriptor
-    descriptors.forEach(desc => {
-        let minVal = Math.min(...desc.variants.map(v => parseFloat(v)));
-        let maxVal = Math.max(...desc.variants.map(v => parseFloat(v)));
-        minMaxValues[desc.name] = { min: minVal, max: maxVal };
-    });
-
-    // Normalize each scenario
-    let normalizedScenarios = [];
-    matrixData.forEach(scenario => {
-        let normalizedScore = 0;
-        let totalWeight = 0;
-
-        descriptors.forEach(desc => {
-            let variantValue = parseFloat(scenario.variant);
-            let weight = ahpWeights[desc.name];
-            let normalizedValue = (variantValue - minMaxValues[desc.name].min) / (minMaxValues[desc.name].max - minMaxValues[desc.name].min);
-
-            normalizedScore += normalizedValue * weight;
-            totalWeight += weight;
-        });
-
-        normalizedScenarios.push({
-            descriptor: scenario.descRow,
-            variant: scenario.variantRow,
-            score: normalizedScore / totalWeight
-        });
-    });
-
-    return normalizedScenarios;
 }
