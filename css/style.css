@@ -20,27 +20,37 @@ button:hover {
     background-color: #2980b9;
 }
 
-#cross-impact-matrix table {
+table {
     width: 100%;
     border-collapse: collapse;
+    margin-bottom: 20px;
 }
 
-#cross-impact-matrix th, td {
+th, td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 10px;
     text-align: center;
 }
 
-#scenario-tableau {
-    margin-top: 20px;
+th {
+    background-color: #f4f4f4;
 }
 
-#scenario-table {
+input[type="text"], input[type="number"] {
     width: 100%;
-    border-collapse: collapse;
+    padding: 8px;
 }
 
-#scenario-table th, td {
+.cross-impact-disabled {
+    background-color: #ccc;
+}
+
+td input:disabled {
+    background-color: #ccc;
+    color: #666;
+}
+
+#scenario-table th, #scenario-table td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: center;
