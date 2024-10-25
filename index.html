@@ -19,6 +19,8 @@
                     <tr>
                         <th>Descriptor Name</th>
                         <th>Variants</th>
+                        <th>Min Value</th>
+                        <th>Max Value</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -41,12 +43,26 @@
             <input type="number" id="consistency-value" value="0" />
             <button id="generate-scenarios">Generate Consistent Scenarios</button>
 
+            <!-- Scenario Tableau for Consistent Scenarios -->
             <div id="scenario-tableau">
-                <h3>Consistent Scenarios</h3>
+                <h3>Scenario Tableau (Consistent Scenarios)</h3>
                 <table id="scenario-table">
                     <!-- Dynamically filled -->
                 </table>
             </div>
+        </div>
+
+        <!-- Descriptor Weighting (AHP Method) -->
+        <div id="weighting-section">
+            <h2>Weight Descriptors (AHP Method)</h2>
+            <div id="ahp-sliders"></div>
+        </div>
+
+        <!-- TOPSIS Ranking -->
+        <div id="topsis-section">
+            <h2>TOPSIS Scenario Ranking</h2>
+            <button id="rank-scenarios">Rank Scenarios</button>
+            <ul id="ranked-scenarios"></ul>
         </div>
     </div>
 
