@@ -1,77 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CIB & TOPSIS Scenario Analysis Tool</title>
-  <link rel="stylesheet" href="css/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIB and TOPSIS Tool</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>CIB & TOPSIS Scenario Analysis Tool</h1>
+    <div id="app">
+        <h1>CIB Analysis Tool</h1>
 
-  <!-- Descriptor Input Section -->
-  <div id="descriptor-section">
-    <h2>Add Descriptors</h2>
+        <!-- Section for adding descriptors and variants -->
+        <div id="input-section">
+            <h2>Descriptors and Variants</h2>
+            <button id="add-descriptor">Add Descriptor</button>
+            <div id="descriptor-list"></div>
+        </div>
 
-    <form id="descriptor-form">
-      <label for="descriptor-name">Descriptor Name:</label>
-      <input type="text" id="descriptor-name" required>
+        <!-- Cross-Impact Matrix -->
+        <div id="cross-impact-section">
+            <h2>Cross-Impact Matrix</h2>
+            <div id="cross-impact-matrix"></div>
+        </div>
 
-      <!-- Toggle between Range or Manual -->
-      <label>
-        <input type="radio" id="use-range" name="variant-type" value="range" checked>
-        Use Range
-      </label>
-      <label>
-        <input type="radio" id="use-manual" name="variant-type" value="manual">
-        Manual Entry
-      </label>
+        <!-- Consistency Value and Scenario Generation -->
+        <div id="consistency-section">
+            <h2>Consistency Calculations</h2>
+            <label for="consistency-value">Set Consistency Value: </label>
+            <input type="number" id="consistency-value" value="0" />
+            <button id="generate-scenarios">Generate Consistent Scenarios</button>
 
-      <!-- Range Input Fields -->
-      <div id="range-inputs">
-        <label for="min-value">Min Value:</label>
-        <input type="number" id="min-value" name="min-value" required>
+            <div id="scenario-tableau">
+                <h3>Consistent Scenarios</h3>
+                <table id="scenario-table">
+                    <!-- Dynamically filled -->
+                </table>
+            </div>
+        </div>
+    </div>
 
-        <label for="max-value">Max Value:</label>
-        <input type="number" id="max-value" name="max-value" required>
-
-        <label for="num-variants">Number of Variants:</label>
-        <input type="number" id="num-variants" name="num-variants" min="2" value="5" required>
-      </div>
-
-      <!-- Manual Input Fields -->
-      <div id="manual-inputs" style="display: none;">
-        <label for="manual-variants">Enter Variants (comma-separated):</label>
-        <input type="text" id="manual-variants" name="manual-variants">
-      </div>
-
-      <button type="button" id="add-descriptor">Add Descriptor</button>
-    </form>
-
-    <ul id="descriptor-list"></ul>
-  </div>
-
-  <!-- Cross-Impact Balance Matrix Section -->
-  <div id="matrix-section">
-    <h2>Cross-Impact Balance Matrix</h2>
-    <div id="matrix-editor"></div>
-  </div>
-
-  <!-- Scenario Generation Section -->
-  <div id="scenario-section">
-    <h2>Generate Scenarios</h2>
-    <button id="generate-scenarios">Generate Consistent Scenarios</button>
-    <ul id="scenario-list"></ul>
-  </div>
-
-  <!-- AHP and TOPSIS Ranking Section -->
-  <div id="topsis-section">
-    <h2>Rank Scenarios (TOPSIS)</h2>
-    <div id="weight-sliders"></div>
-    <button id="rank-scenarios">Rank Scenarios</button>
-    <ul id="ranked-scenarios"></ul>
-  </div>
-
-  <script src="js/app.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
