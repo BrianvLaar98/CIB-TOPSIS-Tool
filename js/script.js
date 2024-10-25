@@ -1,6 +1,7 @@
 let descriptors = [];
 let matrixData = [];
 let consistencyValue = 0;
+let ahpWeights = {};
 
 // Add a new descriptor
 document.getElementById('add-descriptor').addEventListener('click', addDescriptor);
@@ -9,7 +10,7 @@ function addDescriptor() {
     const descriptorName = prompt('Enter Descriptor Name');
     if (!descriptorName) return;
 
-    descriptors.push({ name: descriptorName, variants: [] });
+    descriptors.push({ name: descriptorName, variants: [], minValue: 0, maxValue: 100 });
     updateDescriptorTable();
 }
 
@@ -39,6 +40,24 @@ function updateDescriptorTable() {
         variantInput.addEventListener('change', (e) => desc.variants = e.target.value.split(',').map(v => v.trim()));
         variantCell.appendChild(variantInput);
         row.appendChild(variantCell);
+
+        // Min Value
+        const minCell = document.createElement('td');
+        const minInput = document.createElement('input');
+        minInput.type = 'number';
+        minInput.value = desc.minValue;
+        minInput.addEventListener('change', (e) => desc.minValue = parseFloat(e.target.value));
+        minCell.appendChild(minInput);
+        row.appendChild(minCell);
+
+        // Max Value
+        const maxCell = document.createElement('td');
+        const maxInput = document.createElement('input');
+        maxInput.type = 'number';
+        maxInput.value = desc.maxValue;
+        maxInput.addEventListener('change', (e) => desc.maxValue = parseFloat(e.target.value));
+        maxCell.appendChild(maxInput);
+        row.appendChild(maxCell);
         
         // Actions
         const actionCell = document.createElement('td');
@@ -56,6 +75,7 @@ function updateDescriptorTable() {
     });
     
     generateCrossImpactMatrix();
+    generateAHPWeights();
 }
 
 // Generate the cross-impact matrix
@@ -191,4 +211,83 @@ function displayScenarioTable(scenarios) {
         row.appendChild(impactCell);
         scenarioTable.appendChild(row);
     });
+}
+
+// Generate sliders for weighting descriptors (AHP Method)
+function generateAHPWeights() {
+    const ahpSlidersDiv = document.getElementById('ahp-sliders');
+    ahpSlidersDiv.innerHTML = '';
+
+    descriptors.forEach((desc, index) => {
+        let label = document.createElement('label');
+        label.innerText = `${desc.name} Weight: `;
+        let slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = '0';
+        slider.max = '1';
+        slider.step = '0.01';
+        slider.value = '0.5';
+        slider.addEventListener('input', (e) => {
+            ahpWeights[desc.name] = parseFloat(e.target.value);
+        });
+
+        ahpWeights[desc.name] = 0.5; // default weight
+
+        label.appendChild(slider);
+        ahpSlidersDiv.appendChild(label);
+    });
+}
+
+// Rank scenarios based on TOPSIS method and AHP weights
+document.getElementById('rank-scenarios').addEventListener('click', rankScenarios);
+
+function rankScenarios() {
+    // Normalize the data using TOPSIS
+    let normalizedScenarios = normalizeScenarios();
+    let rankedScenarios = normalizedScenarios.sort((a, b) => b.score - a.score);
+
+    // Display the ranked scenarios
+    const rankedScenariosList = document.getElementById('ranked-scenarios');
+    rankedScenariosList.innerHTML = '';
+    rankedScenarios.forEach((scenario, index) => {
+        let li = document.createElement('li');
+        li.textContent = `Rank ${index + 1}: ${scenario.descriptor} - ${scenario.variant} (Score: ${scenario.score.toFixed(2)})`;
+        rankedScenariosList.appendChild(li);
+    });
+}
+
+// Normalize scenarios and apply TOPSIS ranking
+function normalizeScenarios() {
+    let minMaxValues = {};
+
+    // Calculate min and max for each descriptor
+    descriptors.forEach(desc => {
+        let minVal = Math.min(...desc.variants.map(v => parseFloat(v)));
+        let maxVal = Math.max(...desc.variants.map(v => parseFloat(v)));
+        minMaxValues[desc.name] = { min: minVal, max: maxVal };
+    });
+
+    // Normalize each scenario
+    let normalizedScenarios = [];
+    matrixData.forEach(scenario => {
+        let normalizedScore = 0;
+        let totalWeight = 0;
+
+        descriptors.forEach(desc => {
+            let variantValue = parseFloat(scenario.variant);
+            let weight = ahpWeights[desc.name];
+            let normalizedValue = (variantValue - minMaxValues[desc.name].min) / (minMaxValues[desc.name].max - minMaxValues[desc.name].min);
+
+            normalizedScore += normalizedValue * weight;
+            totalWeight += weight;
+        });
+
+        normalizedScenarios.push({
+            descriptor: scenario.descRow,
+            variant: scenario.variantRow,
+            score: normalizedScore / totalWeight
+        });
+    });
+
+    return normalizedScenarios;
 }
