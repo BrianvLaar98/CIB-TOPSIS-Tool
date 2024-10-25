@@ -9,24 +9,69 @@
 <body>
   <h1>CIB & TOPSIS Scenario Analysis Tool</h1>
 
+  <!-- Descriptor Input Section -->
   <div id="descriptor-section">
     <h2>Add Descriptors</h2>
+
     <form id="descriptor-form">
       <label for="descriptor-name">Descriptor Name:</label>
       <input type="text" id="descriptor-name" required>
+
+      <!-- Toggle between Range or Manual -->
+      <label>
+        <input type="radio" id="use-range" name="variant-type" value="range" checked>
+        Use Range
+      </label>
+      <label>
+        <input type="radio" id="use-manual" name="variant-type" value="manual">
+        Manual Entry
+      </label>
+
+      <!-- Range Input Fields -->
+      <div id="range-inputs">
+        <label for="min-value">Min Value:</label>
+        <input type="number" id="min-value" name="min-value" required>
+
+        <label for="max-value">Max Value:</label>
+        <input type="number" id="max-value" name="max-value" required>
+
+        <label for="num-variants">Number of Variants:</label>
+        <input type="number" id="num-variants" name="num-variants" min="2" value="5" required>
+      </div>
+
+      <!-- Manual Input Fields -->
+      <div id="manual-inputs" style="display: none;">
+        <label for="manual-variants">Enter Variants (comma-separated):</label>
+        <input type="text" id="manual-variants" name="manual-variants">
+      </div>
+
       <button type="button" id="add-descriptor">Add Descriptor</button>
     </form>
-    <div id="descriptor-list"></div>
+
+    <ul id="descriptor-list"></ul>
   </div>
 
-  <div id="variant-section" style="display:none;">
-    <h2>Add Variants</h2>
-    <input type="text" id="manual-variants" placeholder="Enter comma-separated variants">
-    <button type="button" id="add-variant">Add Variants</button>
-    <div id="variant-list"></div>
+  <!-- Cross-Impact Balance Matrix Section -->
+  <div id="matrix-section">
+    <h2>Cross-Impact Balance Matrix</h2>
+    <div id="matrix-editor"></div>
   </div>
 
-  <!-- Link the JavaScript file -->
+  <!-- Scenario Generation Section -->
+  <div id="scenario-section">
+    <h2>Generate Scenarios</h2>
+    <button id="generate-scenarios">Generate Consistent Scenarios</button>
+    <ul id="scenario-list"></ul>
+  </div>
+
+  <!-- AHP and TOPSIS Ranking Section -->
+  <div id="topsis-section">
+    <h2>Rank Scenarios (TOPSIS)</h2>
+    <div id="weight-sliders"></div>
+    <button id="rank-scenarios">Rank Scenarios</button>
+    <ul id="ranked-scenarios"></ul>
+  </div>
+
   <script src="js/app.js"></script>
 </body>
 </html>
