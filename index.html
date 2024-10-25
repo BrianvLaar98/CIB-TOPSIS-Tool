@@ -10,11 +10,22 @@
     <div id="app">
         <h1>CIB Analysis Tool</h1>
 
-        <!-- Section for adding descriptors and variants -->
+        <!-- Editable Descriptors and Variants Section -->
         <div id="input-section">
             <h2>Descriptors and Variants</h2>
             <button id="add-descriptor">Add Descriptor</button>
-            <div id="descriptor-list"></div>
+            <table id="descriptor-table">
+                <thead>
+                    <tr>
+                        <th>Descriptor Name</th>
+                        <th>Variants</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Rows added dynamically -->
+                </tbody>
+            </table>
         </div>
 
         <!-- Cross-Impact Matrix -->
