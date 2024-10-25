@@ -1,154 +1,158 @@
-document.getElementById('add-descriptor').addEventListener('click', addDescriptor);
+// Define variables for descriptors and variants
 let descriptors = [];
-let matrix = [];
+let matrixData = [];
+let consistencyValue = 0;
 
-// Function to handle adding descriptors
+// Handle adding descriptors and variants
+document.getElementById('add-descriptor').addEventListener('click', addDescriptor);
+
+// Function to add descriptor
 function addDescriptor() {
-  const name = document.getElementById('descriptor-name').value;
-  const useRange = document.getElementById('use-range').checked;
+    const descriptorName = prompt('Enter Descriptor Name');
+    if (!descriptorName) return;
 
-  if (!name) {
-    alert('Please provide a descriptor name.');
-    return;
-  }
-
-  let descriptor = {
-    name: name,
-    variants: []
-  };
-
-  if (useRange) {
-    const minValue = parseFloat(document.getElementById('min-value').value);
-    const maxValue = parseFloat(document.getElementById('max-value').value);
-    const numVariants = parseInt(document.getElementById('num-variants').value);
-
-    if (isNaN(minValue) || isNaN(maxValue) || numVariants <= 0) {
-      alert('Please provide valid range values and number of variants.');
-      return;
+    const variantCount = prompt('How many variants does this descriptor have?');
+    let variants = [];
+    for (let i = 0; i < variantCount; i++) {
+        const variantName = prompt(`Enter name for Variant ${i + 1}`);
+        variants.push(variantName);
     }
 
-    for (let i = 0; i < numVariants; i++) {
-      const variantValue = minValue + (maxValue - minValue) * (i / (numVariants - 1));
-      descriptor.variants.push(variantValue.toFixed(2));
-    }
-  } else {
-    const variantsInput = document.getElementById('manual-variants').value.trim();
-    if (!variantsInput) {
-      alert('Please enter at least one variant.');
-      return;
-    }
-
-    descriptor.variants = variantsInput.split(',').map(variant => variant.trim());
-  }
-
-  descriptors.push(descriptor);
-  updateDescriptorList();
-  updateMatrix();
-  clearFormFields();
+    descriptors.push({ name: descriptorName, variants: variants });
+    updateDescriptorList();
+    generateCrossImpactMatrix();
 }
 
-// Function to clear form fields after adding a descriptor
-function clearFormFields() {
-  document.getElementById('descriptor-name').value = '';
-  document.getElementById('min-value').value = '';
-  document.getElementById('max-value').value = '';
-  document.getElementById('num-variants').value = 5;
-  document.getElementById('manual-variants').value = '';
-}
-
-// Function to update the displayed descriptor list
+// Update list of descriptors
 function updateDescriptorList() {
-  const list = document.getElementById('descriptor-list');
-  list.innerHTML = '';
-  descriptors.forEach(descriptor => {
-    const li = document.createElement('li');
-    li.textContent = `${descriptor.name}: Variants [${descriptor.variants.join(', ')}]`;
-    list.appendChild(li);
-  });
-}
-
-// Function to update the cross-impact balance matrix
-function updateMatrix() {
-  const matrixEditor = document.getElementById('matrix-editor');
-  matrixEditor.innerHTML = '';
-
-  if (matrix.length !== descriptors.length) {
-    matrix = Array.from({ length: descriptors.length }, () => Array(descriptors.length).fill(0));
-  }
-
-  const table = document.createElement('table');
-  descriptors.forEach((_, i) => {
-    const row = document.createElement('tr');
-    descriptors.forEach((_, j) => {
-      const cell = document.createElement('td');
-      const input = document.createElement('input');
-      input.type = 'number';
-      input.value = matrix[i][j];
-      input.addEventListener('input', function () {
-        matrix[i][j] = parseFloat(this.value);
-      });
-      cell.appendChild(input);
-      row.appendChild(cell);
+    const listDiv = document.getElementById('descriptor-list');
+    listDiv.innerHTML = '';
+    descriptors.forEach((desc, index) => {
+        let descDiv = document.createElement('div');
+        descDiv.innerText = `${index + 1}. ${desc.name}: ${desc.variants.join(', ')}`;
+        listDiv.appendChild(descDiv);
     });
-    table.appendChild(row);
-  });
-  matrixEditor.appendChild(table);
 }
 
-// Event listener for generating scenarios
-document.getElementById('generate-scenarios').addEventListener('click', generateScenarios);
-
-function generateScenarios() {
-  const scenarioList = document.getElementById('scenario-list');
-  scenarioList.innerHTML = '';
-
-  descriptors.forEach((descriptor, index) => {
-    const scenario = `${descriptor.name}: ${descriptor.variants[0]} (Min), ${descriptor.variants[descriptor.variants.length - 1]} (Max)`;
-    const consistencyValue = calculateConsistency(index);
-    const li = document.createElement('li');
-    li.textContent = `${scenario} - Consistency: ${consistencyValue.toFixed(2)}`;
-    scenarioList.appendChild(li);
-  });
+// Generate Cross-Impact Matrix dynamically
+function generateCrossImpactMatrix() {
+    const matrixDiv = document.getElementById('cross-impact-matrix');
+    matrixDiv.innerHTML = '';
+    
+    if (descriptors.length === 0) return;
+    
+    let table = document.createElement('table');
+    let headerRow = document.createElement('tr');
+    let emptyCell = document.createElement('th');
+    headerRow.appendChild(emptyCell);
+    
+    // Create headers for the table
+    descriptors.forEach(desc => {
+        desc.variants.forEach(variant => {
+            let headerCell = document.createElement('th');
+            headerCell.innerText = `${desc.name}: ${variant}`;
+            headerRow.appendChild(headerCell);
+        });
+    });
+    table.appendChild(headerRow);
+    
+    // Create the matrix cells
+    descriptors.forEach(descRow => {
+        descRow.variants.forEach(variantRow => {
+            let row = document.createElement('tr');
+            let rowHeader = document.createElement('th');
+            rowHeader.innerText = `${descRow.name}: ${variantRow}`;
+            row.appendChild(rowHeader);
+            
+            descriptors.forEach(descCol => {
+                descCol.variants.forEach(variantCol => {
+                    let cell = document.createElement('td');
+                    let input = document.createElement('input');
+                    input.type = 'number';
+                    input.value = 0;
+                    input.addEventListener('change', (e) => updateMatrixData(descRow.name, variantRow, descCol.name, variantCol, e.target.value));
+                    cell.appendChild(input);
+                    row.appendChild(cell);
+                });
+            });
+            table.appendChild(row);
+        });
+    });
+    matrixDiv.appendChild(table);
 }
 
-// Function to calculate consistency based on the CIB cross-impact matrix
-function calculateConsistency(descriptorIndex) {
-  let consistencySum = 0;
-
-  descriptors.forEach((_, otherIndex) => {
-    if (descriptorIndex !== otherIndex) {
-      consistencySum += matrix[descriptorIndex][otherIndex];
-    }
-  });
-
-  const maxPossibleSum = descriptors.length * 3;
-  const normalizedConsistency = (consistencySum + maxPossibleSum) / (2 * maxPossibleSum);
-  return normalizedConsistency * 100;
+// Store impact values in matrixData
+function updateMatrixData(descRow, variantRow, descCol, variantCol, value) {
+    matrixData.push({ descRow, variantRow, descCol, variantCol, value });
 }
 
-// Event listener for ranking scenarios
-document.getElementById('rank-scenarios').addEventListener('click', rankScenarios);
+// Handle consistency value change
+document.getElementById('consistency-value').addEventListener('input', (e) => {
+    consistencyValue = e.target.value;
+});
 
-function rankScenarios() {
-  const rankedScenarios = document.getElementById('ranked-scenarios');
-  rankedScenarios.innerHTML = '';
+// Generate consistent scenarios
+document.getElementById('generate-scenarios').addEventListener('click', generateConsistentScenarios);
 
-  const scenarios = ['Scenario 1', 'Scenario 2', 'Scenario 3'];
-  const sortedScenarios = scenarios.sort();
+// Logic for generating consistent scenarios
+function generateConsistentScenarios() {
+    let scenarios = [];
+    descriptors.forEach(descRow => {
+        descRow.variants.forEach(variantRow => {
+            let isConsistent = true;
+            let scenario = { descriptor: descRow.name, variant: variantRow, impactSum: 0 };
+            
+            // Calculate impact sums
+            matrixData.forEach(data => {
+                if (data.descRow === descRow.name && data.variantRow === variantRow) {
+                    scenario.impactSum += parseInt(data.value);
+                }
+            });
 
-  sortedScenarios.forEach(scenario => {
-    const li = document.createElement('li');
-    li.textContent = scenario;
-    rankedScenarios.appendChild(li);
-  });
+            // Consistency check
+            if (scenario.impactSum < consistencyValue) {
+                isConsistent = false;
+            }
+
+            if (isConsistent) {
+                scenarios.push(scenario);
+            }
+        });
+    });
+
+    displayScenarioTable(scenarios);
 }
 
-// Show or hide manual entry fields depending on the chosen option
-document.getElementById('use-range').addEventListener('change', toggleVariantInput);
-document.getElementById('use-manual').addEventListener('change', toggleVariantInput);
-
-function toggleVariantInput() {
-  const useRange = document.getElementById('use-range').checked;
-  document.getElementById('range-inputs').style.display = useRange ? 'block' : 'none';
-  document.getElementById('manual-inputs').style.display = useRange ? 'none' : 'block';
+// Display consistent scenarios in tableau
+function displayScenarioTable(scenarios) {
+    const scenarioTable = document.getElementById('scenario-table');
+    scenarioTable.innerHTML = '';
+    
+    let headerRow = document.createElement('tr');
+    let headerDesc = document.createElement('th');
+    headerDesc.innerText = 'Descriptor';
+    let headerVariant = document.createElement('th');
+    headerVariant.innerText = 'Variant';
+    let headerImpact = document.createElement('th');
+    headerImpact.innerText = 'Impact Sum';
+    
+    headerRow.appendChild(headerDesc);
+    headerRow.appendChild(headerVariant);
+    headerRow.appendChild(headerImpact);
+    scenarioTable.appendChild(headerRow);
+    
+    scenarios.forEach(scenario => {
+        let row = document.createElement('tr');
+        let descCell = document.createElement('td');
+        descCell.innerText = scenario.descriptor;
+        let variantCell = document.createElement('td');
+        variantCell.innerText = scenario.variant;
+        let impactCell = document.createElement('td');
+        impactCell.innerText = scenario.impactSum;
+        
+        row.appendChild(descCell);
+        row.appendChild(variantCell);
+        row.appendChild(impactCell);
+        scenarioTable.appendChild(row);
+    });
 }
