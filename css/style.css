@@ -41,18 +41,39 @@ input[type="text"], input[type="number"], input[type="range"] {
     padding: 8px;
 }
 
-#ahp-sliders label {
-    display: block;
-    margin-bottom: 10px;
+.cross-impact-disabled {
+    background-color: #ccc;
 }
 
-#ranked-scenarios {
-    list-style-type: none;
-    padding: 0;
+.cross-impact-value-3 { background-color: #006400; color: white; }
+.cross-impact-value-2 { background-color: #228B22; color: white; }
+.cross-impact-value-1 { background-color: #32CD32; color: white; }
+.cross-impact-value0 { background-color: white; color: black; }
+.cross-impact-value-1 { background-color: #FF7F7F; color: white; }
+.cross-impact-value-2 { background-color: #FF4500; color: white; }
+.cross-impact-value-3 { background-color: #B22222; color: white; }
+
+.variant-color {
+    padding: 5px;
+    margin: 5px 0;
+    color: white;
 }
 
-#ranked-scenarios li {
-    padding: 10px;
+#descriptor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#scenario-table {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.scenario-card {
     background-color: #ecf0f1;
-    margin-bottom: 5px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    width: 200px;
 }
