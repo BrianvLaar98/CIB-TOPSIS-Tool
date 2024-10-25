@@ -1,59 +1,47 @@
 body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  background-color: #f5f5f5;
+    font-family: Arial, sans-serif;
+    margin: 20px;
 }
 
-h1, h2 {
-  color: #333;
-}
-
-#descriptor-form, #matrix-section, #scenario-section, #topsis-section {
-  margin-bottom: 30px;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-label {
-  display: block;
-  margin-top: 10px;
-}
-
-input[type="text"], input[type="number"] {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
+h1, h2, h3 {
+    color: #2c3e50;
 }
 
 button {
-  margin-top: 15px;
-  padding: 10px 15px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    margin: 10px 0;
 }
 
 button:hover {
-  background-color: #45a049;
+    background-color: #2980b9;
 }
 
-ul {
-  list-style-type: none;
-  padding: 0;
+#cross-impact-matrix table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-ul li {
-  padding: 8px;
-  margin: 5px 0;
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+#cross-impact-matrix th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
 }
 
-input[type="range"] {
-  width: 100%;
+#scenario-tableau {
+    margin-top: 20px;
+}
+
+#scenario-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#scenario-table th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
 }
